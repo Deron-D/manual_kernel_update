@@ -18,7 +18,7 @@ MACHINES = {
 Vagrant.configure("2") do |config|
   MACHINES.each do |boxname, boxconfig|
     # Disable shared folders
-    config.vm.synced_folder ".", "/vagrant", disabled: false
+    config.vm.synced_folder ".", "/vagrant", disabled: true
     # Apply VM config
     config.vm.define boxname do |box|
       # Set VM base box and hostname
@@ -42,11 +42,20 @@ Vagrant.configure("2") do |config|
         v.memory = boxconfig[:memory]
         v.cpus = boxconfig[:cpus]
       end
+      # Reload vm after provision      
+      box.trigger.after [:up, :provision] do |t|
+        t.name = "Reboot after up and provisioning"
+        t.run = { :inline => "vagrant reload" }
+      end
       box.vm.provision "shell", inline: <<-SHELL
         mkdir -p ~root/.ssh
         cp ~vagrant/.ssh/auth* ~root/.ssh
-        yum install -y mdadm smartmontools hdparm gdisk wget kernel-devel-3.10.0-1127.el7.x86_64
+        yum install -y mdadm smartmontools hdparm gdisk wget
+        yum install -y http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+        yum --enablerepo elrepo-kernel install kernel-ml -y
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+        grub2-set-default 0
       SHELL
-    end
+      end
   end
 end
