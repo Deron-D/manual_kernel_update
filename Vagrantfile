@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
       end
       # Reload vm after provision      
       box.trigger.after [:up, :provision] do |t|
-        t.name = "Reboot after up and provisioning"
+        t.name = "Reboot after up and provision"
         t.run = { :inline => "vagrant reload" }
       end
       box.vm.provision "shell", inline: <<-SHELL
