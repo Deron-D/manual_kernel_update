@@ -1,5 +1,4 @@
 # Describe VMs
-# Deron config Vagrantfile
 MACHINES = {
   # VM name "kernel update"
   :"kernel-update" => {
@@ -19,7 +18,7 @@ MACHINES = {
 Vagrant.configure("2") do |config|
   MACHINES.each do |boxname, boxconfig|
     # Disable shared folders
-    config.vm.synced_folder ".", "/vagrant", disabled: true
+    config.vm.synced_folder ".", "/vagrant", disabled: false
     # Apply VM config
     config.vm.define boxname do |box|
       # Set VM base box and hostname
@@ -43,6 +42,11 @@ Vagrant.configure("2") do |config|
         v.memory = boxconfig[:memory]
         v.cpus = boxconfig[:cpus]
       end
+      box.vm.provision "shell", inline: <<-SHELL
+        mkdir -p ~root/.ssh
+        cp ~vagrant/.ssh/auth* ~root/.ssh
+        yum install -y mdadm smartmontools hdparm gdisk wget kernel-devel-3.10.0-1127.el7.x86_64
+      SHELL
     end
   end
 end
