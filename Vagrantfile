@@ -1,4 +1,5 @@
 # Describe VMs
+# Deron config Vagrantfile
 MACHINES = {
   # VM name "kernel update"
   :"kernel-update" => {
